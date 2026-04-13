@@ -31,8 +31,8 @@ export type BackgroundFetchStatus = 0 | 1 | 2;
  * |---|---|---|
  * | `0` | [[BackgroundFetch.NETWORK_TYPE_NONE]] | No network constraint.  The job will run regardless of network state. |
  * | `1` | [[BackgroundFetch.NETWORK_TYPE_ANY]] | The job requires any active network connection. |
- * | `2` | [[BackgroundFetch.NETWORK_TYPE_CELLULAR]] | The job requires a cellular (mobile data) network connection. |
- * | `3` | [[BackgroundFetch.NETWORK_TYPE_UNMETERED]] | The job requires an unmetered (e.g. Wi-Fi) network connection. |
- * | `4` | [[BackgroundFetch.NETWORK_TYPE_NOT_ROAMING]] | The job requires a non-roaming network connection. |
+ * | `2` | [[BackgroundFetch.NETWORK_TYPE_UNMETERED]] | The job requires an unmetered (e.g. Wi-Fi) network connection. |
+ * | `3` | [[BackgroundFetch.NETWORK_TYPE_NOT_ROAMING]] | The job requires a non-roaming network connection. |
+ * | `4` | [[BackgroundFetch.NETWORK_TYPE_CELLULAR]] | The job requires a cellular (mobile data) network connection. |
  */
 export type NetworkType = 0 | 1 | 2 | 3 | 4;

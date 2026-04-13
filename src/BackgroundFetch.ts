@@ -80,25 +80,25 @@ declare class BackgroundFetch {
   static NETWORK_TYPE_ANY: NetworkType;
 
   /**
-   * [Android only] The task requires a cellular (mobile data) network connection.
-   *
-   * Value: `2`
-   */
-  static NETWORK_TYPE_CELLULAR: NetworkType;
-
-  /**
    * [Android only] The task requires an unmetered (e.g. Wi-Fi) network connection.
    *
-   * Value: `3`
+   * Value: `2`
    */
   static NETWORK_TYPE_UNMETERED: NetworkType;
 
   /**
    * [Android only] The task requires a non-roaming network connection.
    *
-   * Value: `4`
+   * Value: `3`
    */
   static NETWORK_TYPE_NOT_ROAMING: NetworkType;
+
+  /**
+   * [Android only] The task requires a cellular (mobile data) network connection.
+   *
+   * Value: `4`
+   */
+  static NETWORK_TYPE_CELLULAR: NetworkType;
 
   // ── Methods ─────────────────────────────────────────────────────────
 
@@ -221,7 +221,7 @@ declare class BackgroundFetch {
    * });
    * ```
    */
-  static finish(taskId?: string): void;
+  static finish(taskId: string): void;
 
   /**
    * Query the current authorization status of the Background Fetch API.
