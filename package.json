@@ -28,6 +28,9 @@
     "capacitor",
     "flutter"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "license": "MIT",
   "author": "Transistor Software <info@transistorsoft.com>"
 }
