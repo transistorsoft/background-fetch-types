@@ -17,7 +17,7 @@
   "scripts": {
     "build": "rm -rf dist && tsc -p tsconfig.json",
     "watch": "tsc -p tsconfig.json -w",
-    "test": "node -e \"require('./')\"",
+    "test": "node scripts/check-entry.js",
     "prepublishOnly": "npm run build && npm test",
     "preflight": "scripts/preflight.sh",
     "release": "scripts/release.sh"
@@ -34,6 +34,13 @@
   ],
   "publishConfig": {
     "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/transistorsoft/background-fetch-types.git"
+  },
+  "bugs": {
+    "url": "https://github.com/transistorsoft/background-fetch-types/issues"
   },
   "license": "MIT",
   "author": "Transistor Software <info@transistorsoft.com>"

@@ -23,6 +23,8 @@ version that is not greater than package.json's, or is already on npm.
 The workflow checks that the tag equals `package.json`'s version, then runs
 `scripts/preflight.sh --release`:
 
+- `package.json`'s `repository.url` names this repository: provenance makes npm reject a
+  mismatch, and only at the last step, after the tag is public;
 - the build: declarations only, no JavaScript in `dist/`;
 - the packed tarball's contents, and what changed since the version on npm, declarations included;
 - a strict consumer compile;
@@ -34,13 +36,23 @@ dist-tag, so `latest` only moves to a release.
 
 This package is **TypeScript declarations only**. `tsc` emits only `dist/*.d.ts`
 (`emitDeclarationOnly`), which is gitignored and built at publish (`prepublishOnly`). The
-JavaScript entry that `main` and `exports` name is the committed, empty `index.js`. It exists
-so that a bundler compiling one file at a time (esbuild, Vite, Babel or SWC with TypeScript)
-loads nothing, instead of failing on a plain `import { … }` or `export { … } from` of these
-types. 1.0.0 shipped `tsc`'s JavaScript for `src/BackgroundFetch.ts`, which threw
-`ReferenceError: BackgroundFetch is not defined` on load, because that class exists only as a
-declaration. Never give the package run-time code. The `test` script (`require()` of the
-package) and preflight refuse a build that throws on load or puts JavaScript in `dist/`.
+JavaScript entry that `main` and `exports` name is the committed `index.js`. It has no code:
+it declares every name `dist/index.d.ts` exports, each `undefined`, beside the `__esModule`
+marker. Whatever loads the package at run time then finds those names instead of failing on a
+plain `import { … }` or `export { … } from` of these types. That covers a bundler compiling
+one file at a time (esbuild, Vite, Babel or SWC with TypeScript), webpack's export check, and
+Node's ES module loader. 1.0.0 shipped `tsc`'s JavaScript for `src/BackgroundFetch.ts`, which
+threw `ReferenceError: BackgroundFetch is not defined` on load, because that class exists only
+as a declaration. Never give the package run-time code.
+
+`npm test` (`scripts/check-entry.js`, run by `prepublishOnly` after the build) and preflight
+refuse:
+
+- an `index.js` whose names differ from `dist/index.d.ts`'s: a new type exported from
+  `src/index.ts` needs its name added to `index.js`;
+- a name with a value;
+- a load or an ES module import that fails;
+- JavaScript in `dist/`.
 
 What ships is decided by `"files"` in `package.json`: `dist/` and `index.js`, plus what npm
 always adds. Preflight refuses anything else. The build uses the repository's own TypeScript
