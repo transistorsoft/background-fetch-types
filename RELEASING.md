@@ -23,6 +23,8 @@ version that is not greater than package.json's, or is already on npm.
 The workflow checks that the tag equals `package.json`'s version, then runs
 `scripts/preflight.sh --release`:
 
+- `package.json`'s `repository.url` names this repository: provenance makes npm reject a
+  mismatch, and only at the last step, after the tag is public;
 - the build: declarations only, no JavaScript in `dist/`;
 - the packed tarball's contents, and what changed since the version on npm, declarations included;
 - a strict consumer compile;

@@ -41,6 +41,22 @@ if [ "$RELEASE" = 1 ]; then
 else
   ok "$NAME@$VERSION"
 fi
+# The release workflow publishes with provenance, so npm compares repository.url with the
+# GitHub repository the workflow runs in and rejects a mismatch (422) — at the last step, after
+# the tag is public. The repository is the workflow's (GITHUB_REPOSITORY) or origin's.
+slug() { sed -E 's#^.*github\.com[:/]##; s#\.git$##; s#/$##' | tr '[:upper:]' '[:lower:]'; }
+have="$(node -p "(require('./package.json').repository || {}).url || ''" | slug)"
+[ -n "$have" ] || fail "package.json has no repository.url — npm would reject the provenance publish"
+origin="$(git remote get-url origin 2>/dev/null || true)"
+want="${GITHUB_REPOSITORY:-}"
+[ -n "$want" ] || case "$origin" in *github.com[:/]*) want="$origin" ;; esac
+if [ -n "$want" ]; then
+  want="$(echo "$want" | slug)"
+  [ "$have" = "$want" ] || fail "package.json repository.url names $have, but this repository is $want"
+  ok "repository.url is github.com/$have"
+else
+  ok "repository.url is github.com/$have ${DIM}(origin is not on GitHub: not compared)${RESET}"
+fi
 
 step "2. build"
 # The repository's own TypeScript (a devDependency, through npm ci), not whatever tsc a
