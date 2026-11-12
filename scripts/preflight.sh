@@ -66,6 +66,9 @@ npm run -s build >"$WORK/build.log" 2>&1 || { cat "$WORK/build.log" >&2; fail "n
 js="$(find dist -name '*.js' | head -3 | tr '\n' ' ')"
 [ -z "$js" ] || fail "dist/ has JavaScript ($js) — this package ships declarations only (tsconfig.json emitDeclarationOnly)"
 ok "dist/ rebuilt by tsc $(node_modules/.bin/tsc --version | cut -d' ' -f2): $(find dist -name '*.d.ts' | wc -l | tr -d ' ') declaration files, no JavaScript"
+# index.js declares every name dist/index.d.ts exports (scripts/check-entry.js).
+node scripts/check-entry.js >"$WORK/check-entry.log" 2>&1 || { cat "$WORK/check-entry.log" >&2; fail "index.js does not match dist/index.d.ts"; }
+ok "index.js declares every name dist/index.d.ts exports, all undefined"
 
 step "3. the tarball"
 # Its own directory: the version on npm, packed below, has the same file name whenever
@@ -161,15 +164,19 @@ for mode in "commonjs node10" "node16 node16" "esnext bundler"; do
 done
 ok "strict TypeScript compiles under node10, node16 and bundler resolution"
 # A bundler that compiles one file at a time keeps a plain `import { … }` / `export { … } from`
-# of these types and loads the module; 1.0.0 threw there. It must load, and export nothing.
-node -e '
+# of these types and loads the module (1.0.0 threw there), and Node's ES module loader links
+# each named import. The installed package must load, with every name present and undefined.
+names="$(node -e '
   const m = require("@transistorsoft/background-fetch-types");
-  if (Object.keys(m).length || m.__esModule !== true) {
-    console.error("require() exports", JSON.stringify(Object.keys(m)), "__esModule", m.__esModule); process.exit(1);
-  }' || fail "require() of the package throws, or exports something"
-node --input-type=module -e 'import m from "@transistorsoft/background-fetch-types"; await import("@transistorsoft/background-fetch-types");' \
-  || fail "import of the package from an ES module throws"
-ok "require() and import load an empty module"
+  const keys = Object.keys(m);
+  if (!keys.includes("default") || keys.some((k) => m[k] !== undefined) || m.__esModule !== true) {
+    console.error("require() gives", JSON.stringify(m), "__esModule", m.__esModule); process.exit(1);
+  }
+  console.log(keys.filter((k) => k !== "default").join(", "));')" \
+  || fail "require() of the package throws, or gives a name a value"
+node --input-type=module -e "import D, { $names } from \"$NAME\";" \
+  || fail "an ES module cannot import the default and { $names } from the package"
+ok "require() and import load it: default, $names — all undefined"
 
 echo
 echo "${GREEN}preflight passed${RESET} — $NAME@$VERSION"
