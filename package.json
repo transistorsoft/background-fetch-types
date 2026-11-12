@@ -18,7 +18,9 @@
     "build": "rm -rf dist && tsc -p tsconfig.json",
     "watch": "tsc -p tsconfig.json -w",
     "test": "node -e \"require('./')\"",
-    "prepublishOnly": "npm run build && npm test"
+    "prepublishOnly": "npm run build && npm test",
+    "preflight": "scripts/preflight.sh",
+    "release": "scripts/release.sh"
   },
   "devDependencies": {
     "typescript": "^5.0.0"
